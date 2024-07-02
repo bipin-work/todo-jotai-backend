@@ -3,6 +3,8 @@ import rootRouter from "./routes";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import errorHandler from "./middlewares/errorHandler";
+import { errorMiddleware } from "./middlewares/error";
+import { SignupSchema } from "./schema/user";
 
 const app: Express = express();
 app.use(express.json());
@@ -19,7 +21,7 @@ export const prismaClient = new PrismaClient({
   log: ["query"],
 });
 
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 app.listen(3000, () => {
   console.log("App working!");

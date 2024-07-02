@@ -2,6 +2,10 @@ import { PrismaClient, User } from "@prisma/client";
 import { hashSync, compareSync } from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../../secret";
+import { NextFunction } from "express";
+import { BadRequestsException } from "../exceptions/bad-requests";
+import { ErrorCode } from "../exceptions/root";
+import { NotFoundException } from "../exceptions/not-found";
 const prisma = new PrismaClient();
 
 export const getUsers = async (): Promise<User[]> => {
@@ -19,13 +23,20 @@ export const createUser = async ({ name, email, username, password }: User) => {
   });
 };
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string,
+  next: NextFunction
+) => {
   let user = await prisma.user.findFirst({ where: { email } });
   if (!user) {
-    throw Error("User does not exists");
+    throw new NotFoundException("User not found!", ErrorCode.USER_NOT_FOUND);
   }
   if (!compareSync(password, user.password)) {
-    throw Error("Password incorrect");
+    throw new BadRequestsException(
+      "Password is incorrect!",
+      ErrorCode.INCORRECT_PASSWORD
+    );
   }
 
   const token = jwt.sign(
