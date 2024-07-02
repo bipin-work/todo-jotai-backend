@@ -43,3 +43,7 @@ export const login = async (
   const userAndToken = await loginUser(email, password, next);
   res.json(userAndToken);
 };
+
+export const me = async (req: Request, res: Response) => {
+  res.json(req.user as any);
+};
