@@ -2,31 +2,45 @@ import { PrismaClient, Task } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const getTasks = async (): Promise<Task[]> => {
-  return prisma.task.findMany();
+export const getTasks = async (userId: string): Promise<Task[]> => {
+  return prisma.task.findMany({
+    where: {
+      userId,
+    },
+  });
 };
 
-export const addTask = async (task: Task) => {
+export const addTask = async (userId: string, task: Task) => {
   return prisma.task.create({
-    data: task,
+    data: {
+      ...task,
+      userId,
+    },
   });
 };
 
-export const getTaskById = async (id: string): Promise<Task | null> => {
+export const getTaskById = async (
+  userId: string,
+  id: string
+): Promise<Task | null> => {
   return prisma.task.findUnique({
-    where: { id },
+    where: { id, userId },
   });
 };
 
-export const updateTaskById = async (id: string, task: Task) => {
+export const updateTaskById = async (
+  userId: string,
+  id: string,
+  task: Task
+) => {
   return prisma.task.update({
-    where: { id },
+    where: { id, userId },
     data: task,
   });
 };
 
-export const deleteTaskById = async (id: string) => {
+export const deleteTaskById = async (userId: string, id: string) => {
   return prisma.task.delete({
-    where: { id },
+    where: { id, userId },
   });
 };

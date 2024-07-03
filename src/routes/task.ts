@@ -6,13 +6,15 @@ import {
   getTask,
   updateTask,
 } from "../controllers/task";
+import { errorHandler } from "../error-handler";
+import authMiddleware from "../middlewares/auth";
 
 const taskRoutes: Router = Router();
 
-taskRoutes.get("/", getAllTasks);
-taskRoutes.post("/", createTask);
-taskRoutes.put("/:id", updateTask);
-taskRoutes.delete("/:id", deleteTask);
-taskRoutes.get("/:id", getTask);
+taskRoutes.get("/", [authMiddleware], errorHandler(getAllTasks));
+taskRoutes.post("/", [authMiddleware], errorHandler(createTask));
+taskRoutes.put("/:id", [authMiddleware], errorHandler(updateTask));
+taskRoutes.delete("/:id", [authMiddleware], errorHandler(deleteTask));
+taskRoutes.get("/:id", [authMiddleware], errorHandler(getTask));
 
 export default taskRoutes;

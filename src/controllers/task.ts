@@ -6,6 +6,8 @@ import {
   getTasks,
   updateTaskById,
 } from "../services/taskService";
+import { NotFoundException } from "../exceptions/not-found";
+import { ErrorCode } from "../exceptions/root";
 
 export const getAllTasks = async (
   req: Request,
@@ -13,8 +15,9 @@ export const getAllTasks = async (
   next: NextFunction
 ) => {
   try {
-    const tasks = await getTasks();
-    res.json(tasks);
+    const user = req.user;
+    const tasks = await getTasks(user.id);
+    res.json(tasks || []);
   } catch (error) {
     next(error);
   }
@@ -26,7 +29,8 @@ export const createTask = async (
   next: NextFunction
 ) => {
   try {
-    const newTask = await addTask(req.body);
+    const user = req.user;
+    const newTask = await addTask(user.id, req.body);
     res.status(201).json(newTask);
   } catch (error) {
     next(error);
@@ -38,7 +42,8 @@ export const updateTask = async (
   next: NextFunction
 ) => {
   try {
-    const updatedTask = await updateTaskById(req.params.id, req.body);
+    const user = req.user;
+    const updatedTask = await updateTaskById(user.id, req.params.id, req.body);
     res.json(updatedTask);
   } catch (error) {
     next(error);
@@ -50,8 +55,12 @@ export const getTask = async (
   next: NextFunction
 ) => {
   try {
-    const task = await getTaskById(req.params.id);
-    res.json(task);
+    const user = req.user;
+    const task = await getTaskById(user.id, req.params.id);
+    if (!task) {
+      throw new NotFoundException("Task not found!", ErrorCode.TASK_NOT_FOUND);
+    }
+    res.json(task || []);
   } catch (error) {
     next(error);
   }
@@ -63,7 +72,8 @@ export const deleteTask = async (
   next: NextFunction
 ) => {
   try {
-    const task = await deleteTaskById(req.params.id);
+    const user = req.user;
+    const task = await deleteTaskById(user.id, req.params.id);
     res.json(task);
   } catch (error) {
     next(error);
